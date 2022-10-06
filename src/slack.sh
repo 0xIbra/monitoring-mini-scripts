@@ -17,7 +17,7 @@ function slack_notification() {
     webhook=$1
     message=$2
 
-    response=$(curl -Li -o /dev/null -sw '%{http_code}' --location --request POST "${webhook}" --header 'Content-Type: application/json' --data-raw "{\"text\": \"${message}\"}")
+    response=$(curl -Li -o /dev/null -sw '%{http_code}' --location --request POST "${webhook}" --header 'Content-Type: application/json' --data-raw "{\"type\": \"mrkdwn\", \"text\": \"$message\"}")
     if [[ $response != '200' ]]; then
         echo "[error] could not send slack message. http_code: ${response}"
     fi

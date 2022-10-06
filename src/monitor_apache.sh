@@ -38,18 +38,30 @@ if [[ $(is_running apache2) == "0" ]]; then
 
     # if downtime > 15 mins, then restart apache
     if [[ downtime > 900 ]]; then
-      echo "apache been down for $down_text, attempting to restart..."
+      log "apache been down for $down_text, attempting to restart..."
       response=$(service apache2 restart &> /dev/null)
       
-      if [[ $(is_running apache2) == "0" ]]; then
+      if [[ $(is_running apache2) == "1" ]]; then
+        # apache is now up
         text="apache restarted successfully"
-        echo $text
+        log "${text}"
 
         if [[ $(string_contains "https://" "$MONITORING_SLACK_WEBHOOK") == "1" ]]; then
+          slack_notification "$MONITORING_SLACK_WEBHOOK" "*[$(hostname)]$(date_prefix)* $text"
+        fi
+
+      else
+        # restart did not work, apache still down
+        text="could not restart apache"
+        log "$text"
+
+        if [[ $(string_contains "https://" "$MONITORING_SLACK_WEBHOOK") == "1" ]]; then
+          # multi-line log with contents of `service apache2 status` as a code block below
+          text="*[$(hostname)]$(date_prefix)* $text\n\napache2 status:\n\`\`\` $(service apache2 status) \`\`\`"
+
           slack_notification "$MONITORING_SLACK_WEBHOOK" "$text"
         fi
 
-      else echo "[error] could not restart apache"
       fi
 
     fi
