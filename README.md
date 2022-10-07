@@ -21,6 +21,6 @@ When configuring this script with a cron job, don't forget to use **flock** to a
 5/* * * * * flock -n /tmp/apache_monitor.lock -c "/path/to/scripts_dir/apache_monitor.sh"
 ```
 
-**flock** ensure single execution if the script takes too long.
+**flock** will ensure single execution if the script takes too long.
 
 ----------------------------------------------------------------------
