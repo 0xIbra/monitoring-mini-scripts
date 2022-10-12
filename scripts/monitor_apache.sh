@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-source utils.sh
-source slack.sh
+WORK_DIR="$(dirname "$(realpath "$0")")"
+
+source $WORK_DIR/utils.sh
+source $WORK_DIR/slack.sh
 
 DOWNTIME_BEFORE_RESTART=$DOWNTIME_BEFORE_RESTART
 if [[ -z "${DOWNTIME_BEFORE_RESTART}" ]]; then
@@ -11,9 +13,11 @@ fi
 APACHE_MONITOR_SLACK_HOOK=$APACHE_MONITOR_SLACK_HOOK
 if [[ -z "${APACHE_MONITOR_SLACK_HOOK}" ]]; then
   # if slack env var is undefined, check if defined in file ".env"
-  if [ -e ".env" ]; then
-    source .env
+
+  if [ -e "$WORK_DIR/.env" ]; then
+    source $WORK_DIR/.env
   fi
+
 fi
 
 function restart_successful_handler() {
