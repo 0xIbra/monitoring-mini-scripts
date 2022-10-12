@@ -8,6 +8,14 @@ if [[ -z "${DOWNTIME_BEFORE_RESTART}" ]]; then
   DOWNTIME_BEFORE_RESTART=900
 fi
 
+APACHE_MONITOR_SLACK_HOOK=$APACHE_MONITOR_SLACK_HOOK
+if [[ -z "${APACHE_MONITOR_SLACK_HOOK}" ]]; then
+  # if slack env var is undefined, check if defined in file ".env"
+  if [ -e ".env" ]; then
+    source .env
+  fi
+fi
+
 function restart_successful_handler() {
   text="apache restarted successfully"
   log "${text}"
