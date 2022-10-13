@@ -1,17 +1,5 @@
 #!/usr/bin/env bash
 
-# function checks if a given service is running or not
-function is_running() {
-    servicename=$1
-    
-    servstat=$(service $servicename status)
-    if [[ $servstat == *"active (running)"* ]]; then
-      echo "1"
-    else
-      echo "0"
-    fi
-}
-
 # checks if a string contains another given string
 function string_contains() {
     needle=$1
@@ -21,6 +9,18 @@ function string_contains() {
         echo "1"
     else
         echo "0"
+    fi
+}
+
+# function checks if a given service is running or not
+function is_running() {
+    servicename=$1
+    
+    servstat=$(service $servicename status)
+    if [[ $(string_contains "active (running)" "$servstat") == "1" ]]; then
+      echo "1"
+    else
+      echo "0"
     fi
 }
 
