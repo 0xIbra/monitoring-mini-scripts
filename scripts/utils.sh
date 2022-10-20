@@ -16,9 +16,11 @@ function string_contains() {
 function is_running() {
     servicename=$1
     
-    servstat=$(service $servicename status)
-    if [[ $(string_contains "active (running)" "$servstat") == "1" ]]; then
+    servstat="$(service $servicename status)"
+    if [ $(string_contains "active (running)" "$servstat") == "1" ]; then
       echo "1"
+    elif [ $(string_contains "$servicename" "$servstat") == "0" ]; then
+      echo "null"
     else
       echo "0"
     fi
