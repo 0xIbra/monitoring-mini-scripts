@@ -1,23 +1,19 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 WORK_DIR="$(dirname "$(realpath "$0")")"
 
 source $WORK_DIR/utils.sh
 source $WORK_DIR/slack.sh
 
+DOWNTIME_NULL_RESTART_WAIT_TIME=600
 DOWNTIME_BEFORE_RESTART=$DOWNTIME_BEFORE_RESTART
 if [[ -z "${DOWNTIME_BEFORE_RESTART}" ]]; then
   DOWNTIME_BEFORE_RESTART=900
 fi
 
 APACHE_MONITOR_SLACK_HOOK=$APACHE_MONITOR_SLACK_HOOK
-if [[ -z "${APACHE_MONITOR_SLACK_HOOK}" ]]; then
-  # if slack env var is undefined, check if defined in file ".env"
-
-  if [ -e "$WORK_DIR/.env" ]; then
-    source $WORK_DIR/.env
-  fi
-
+if [ -e "$WORK_DIR/.env" ]; then
+  source $WORK_DIR/.env
 fi
 
 function restart_successful_handler() {
@@ -61,7 +57,7 @@ if [[ "$apache2status" == "0" ]]; then
     if [[ $downdate == "" ]]; then
       log "apache downtime unavailable, waiting 10 minutes before attempting to restart"
 
-      sleep 600
+      sleep $DOWNTIME_NULL_RESTART_WAIT_TIME
 
       # check again if apache still down
       if [[ $(is_running apache2) == "0" ]]; then
@@ -73,12 +69,15 @@ if [[ "$apache2status" == "0" ]]; then
 
         if [[ $(is_running apache2) == "1" ]]; then
           restart_successful_handler
+          exit
         else
           restart_failed_handler
+          exit
         fi
 
       else
         log "apache up on it's own after waiting a bit, no action to take."
+        exit
       fi
 
     fi
