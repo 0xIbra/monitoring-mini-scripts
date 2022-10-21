@@ -41,12 +41,20 @@ function restart_failed_handler() {
   fi
 }
 
-if [[ $(is_running apache2) == "0" ]]; then
+apache2status=$(is_running apache2)
+if [[ "$apache2status" == "0" ]]; then
     # apache down, verify downtime
 
     # retrieving downtime from service status
+    apache_status_content=$(service apache2 status)
+    if [ $(string_contains "apache2" "$apache_status_content") != "1" ]; then
+      # `service apache2 status` returned empty response
+      log "apache status empty, exiting"
+      exit
+    fi
+
+    downdate=$(echo "$apache_status_content" | grep -oP 'since ([a-zA-Z]+) (.*) ([a-zA-Z]+);' | awk '{print $3,$4;}')
     now=$(date "+%F %T")
-    downdate=$(service apache2 status | grep -oP 'since ([a-zA-Z]+) (.*) ([a-zA-Z]+);' | awk '{print $3,$4;}')
 
     # check if downtime available, if not, then wait 10 minutes and try to restart apache
     # waiting 10 minutes to avoid, interrupting ssl update certbot process which requires that apache be down
@@ -110,4 +118,7 @@ if [[ $(is_running apache2) == "0" ]]; then
       log "apache has been down only for $down_text, no action taken."
     fi
 
+elif [ "$apache2status" == "null" ]; then
+  # `service apache2 status` returned empty response
+  log "apache status empty"
 fi
